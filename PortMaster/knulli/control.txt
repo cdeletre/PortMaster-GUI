@@ -45,8 +45,27 @@ get_controls() {
   sdl_controllerconfig="$(< "${SDL_GAMECONTROLLERCONFIG_FILE}")"
 }
 
+pm_swapabxy() {
+  # Kdog abxy swap function
+  # sed recipe from Neverdid with minor fix by Kdog
+  # https://discord.com/channels/1122861252088172575/1284167323330154606/1284190354857525248
+
+  gamecontrollerdb_pm="/tmp/gamecontrollerdb_pm.txt"
+  echo -n > "$gamecontrollerdb_pm"        # Reset the file
+  for line in $(cat "$SDL_GAMECONTROLLERCONFIG_FILE"); do
+    echo "$line" | sed -E 's/(,[ab]:)([^,]+)(.*)(,[ba]:)([^,]+)/\1\5\3\4\2/; s/(,[xy]:)([^,]+)(.*)(,[yx]:)([^,]+)/\1\5\3\4\2/' >> "$gamecontrollerdb_pm"
+  done
+
+  # Deploy only if the resulting file has at least one entry
+  n_entries=`grep ",platform:" "$gamecontrollerdb_pm" | wc -l | cut -d' ' -f1`
+  [ $? -eq 0 && $n_entries -gt 0 ] && export SDL_GAMECONTROLLERCONFIG_FILE="$gamecontrollerdb_pm" && sdl_controllerconfig="$(< "${SDL_GAMECONTROLLERCONFIG_FILE}")"
+}
+
 source $controlfolder/device_info.txt
 source $controlfolder/funcs.txt
 
 GPTOKEYB2="$ESUDO env LD_PRELOAD=$controlfolder/libinterpose.${DEVICE_ARCH}.so $controlfolder/gptokeyb2 $ESUDOKILL"
 GPTOKEYB="$ESUDO $controlfolder/gptokeyb $ESUDOKILL"
+
+# Call pm_swapabxy when enabled
+[ -f "$HOME/.pm_swapabxy" ] && pm_swapabxy
