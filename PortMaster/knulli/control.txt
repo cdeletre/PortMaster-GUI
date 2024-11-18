@@ -47,14 +47,12 @@ get_controls() {
 
 pm_swapabxy() {
   # Kdog abxy swap function
-  # sed recipe from Neverdid with minor fix by Kdog
+  # sed recipe from Nevrdid with minor fix by Kdog
   # https://discord.com/channels/1122861252088172575/1284167323330154606/1284190354857525248
 
   gamecontrollerdb_pm="/tmp/gamecontrollerdb_pm.txt"
-  echo -n > "$gamecontrollerdb_pm"        # Reset the file
-  for line in $(cat "$SDL_GAMECONTROLLERCONFIG_FILE"); do
-    echo "$line" | sed -E 's/(,[ab]:)([^,]+)(.*)(,[ba]:)([^,]+)/\1\5\3\4\2/; s/(,[xy]:)([^,]+)(.*)(,[yx]:)([^,]+)/\1\5\3\4\2/' >> "$gamecontrollerdb_pm"
-  done
+
+  sed -E 's/(,[ab]:)([^,]+)(.*)(,[ba]:)([^,]+)/\1\5\3\4\2/; s/(,[xy]:)([^,]+)(.*)(,[yx]:)([^,]+)/\1\5\3\4\2/' "$SDL_GAMECONTROLLERCONFIG_FILE" > "$gamecontrollerdb_pm"
 
   # Deploy only if the resulting file has at least one entry
   n_entries=`grep ",platform:" "$gamecontrollerdb_pm" | wc -l | cut -d' ' -f1`
