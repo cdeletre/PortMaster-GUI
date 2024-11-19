@@ -21,6 +21,9 @@ export SDL_GAMECONTROLLERCONFIG_FILE="/$controlfolder/gamecontrollerdb.txt"
 # export SDL_GAMECONTROLLERCONFIG=$(grep "Deeplay" "/usr/lib/gamecontrollerdb.txt")
 
 get_controls() {
+
+  [[ -f "$HOME/.pm_swapabxy" ]] && pm_swapabxy && export SDL_GAMECONTROLLERCONFIG="$(< "${SDL_GAMECONTROLLERCONFIG_FILE}")"
+
   sdl2imgshow \
       -i "$EX_RESOURCE_PATH/background.png" \
       -f "$EX_RESOURCE_PATH/DejaVuSans.ttf" \
@@ -34,7 +37,7 @@ get_controls() {
 
 pm_swapabxy() {
   # Kdog abxy swap function
-  # sed recipe from Neverdid with minor fix by Kdog
+  # sed recipe from Nevrdid with minor fix by Kdog
   # https://discord.com/channels/1122861252088172575/1284167323330154606/1284190354857525248
 
   gamecontrollerdb_pm="/tmp/gamecontrollerdb_pm.txt"
@@ -43,7 +46,8 @@ pm_swapabxy() {
 
   # Deploy only if the resulting file has at least one entry
   n_entries=`grep ",platform:" "$gamecontrollerdb_pm" | wc -l | cut -d' ' -f1`
-  [ $? -eq 0 && $n_entries -gt 0 ] && export SDL_GAMECONTROLLERCONFIG_FILE="$gamecontrollerdb_pm" && sdl_controllerconfig="$(< "${SDL_GAMECONTROLLERCONFIG_FILE}")"
+  [[ $? -eq 0 && $n_entries -gt 0 ]] && export SDL_GAMECONTROLLERCONFIG_FILE="$gamecontrollerdb_pm"
+
 }
 
 source $controlfolder/device_info.txt
@@ -51,6 +55,3 @@ source $controlfolder/funcs.txt
 
 GPTOKEYB2="$ESUDO env LD_PRELOAD=$controlfolder/libinterpose.${DEVICE_ARCH}.so $controlfolder/gptokeyb2 $ESUDOKILL"
 GPTOKEYB="$ESUDO $controlfolder/gptokeyb $ESUDOKILL"
-
-# Call pm_swapabxy when enabled
-[ -f "$HOME/.pm_swapabxy" ] && pm_swapabxy
