@@ -42,7 +42,11 @@ get_controls() {
 
   export SDL_GAMECONTROLLERCONFIG_FILE="/tmp/gamecontrollerdb.txt"
 
+  # Call pm_swapabxy when enabled
+  [[ -f "$HOME/.pm_swapabxy" ]] && pm_swapabxy && export SDL_GAMECONTROLLERCONFIG="$(< "${SDL_GAMECONTROLLERCONFIG_FILE}")"
+
   sdl_controllerconfig="$(< "${SDL_GAMECONTROLLERCONFIG_FILE}")"
+    
 }
 
 pm_swapabxy() {
@@ -56,7 +60,8 @@ pm_swapabxy() {
 
   # Deploy only if the resulting file has at least one entry
   n_entries=`grep ",platform:" "$gamecontrollerdb_pm" | wc -l | cut -d' ' -f1`
-  [ $? -eq 0 && $n_entries -gt 0 ] && export SDL_GAMECONTROLLERCONFIG_FILE="$gamecontrollerdb_pm" && sdl_controllerconfig="$(< "${SDL_GAMECONTROLLERCONFIG_FILE}")"
+  [[ $? -eq 0 && $n_entries -gt 0 ]] && export SDL_GAMECONTROLLERCONFIG_FILE="$gamecontrollerdb_pm"
+
 }
 
 source $controlfolder/device_info.txt
@@ -64,6 +69,3 @@ source $controlfolder/funcs.txt
 
 GPTOKEYB2="$ESUDO env LD_PRELOAD=$controlfolder/libinterpose.${DEVICE_ARCH}.so $controlfolder/gptokeyb2 $ESUDOKILL"
 GPTOKEYB="$ESUDO $controlfolder/gptokeyb $ESUDOKILL"
-
-# Call pm_swapabxy when enabled
-[ -f "$HOME/.pm_swapabxy" ] && pm_swapabxy
